@@ -8,43 +8,35 @@ namespace IIM
 	{
 		public enum OPERATOR
 		{
-			SETX = 0,
-			SETY = 1,
+			SET = 0,
 		}
 
 		[Tooltip("Variable to modify")]
-		public SharedInt AposX;
-		public SharedInt AposY;
-
-		public SharedInt BposX;
-		public SharedInt BposY;
+		public SharedBool IsOurPoint;
 
 		[Tooltip("Modification operator")]
-		public OPERATOR opa;
-		public OPERATOR opb;
-
+		OPERATOR op;
 
 		[Tooltip("Value used with operator")]
-		public SharedInt AposX_Value;
-		public SharedInt AposY_Value;
-
-		public SharedInt BposX_Value;
-		public SharedInt BposY_Value;
+		public SharedBool IsOurPointBool;
 
 		public override TaskStatus OnUpdate()
 		{
-			switch (opa)
+			switch (op)
 			{
-				case OPERATOR.SETX: AposX_Value.Value = AposX.Value; break;
-				case OPERATOR.SETY: AposY_Value.Value = AposY.Value; break;
+				case OPERATOR.SET: IsOurPointBool.Value = IsOurPoint.Value; break;
 			}
 
-			switch (opb)
+			if (!IsOurPointBool.Value)
 			{
-				case OPERATOR.SETX: BposX_Value.Value = BposX.Value; break;
-				case OPERATOR.SETY: BposY_Value.Value = BposY.Value; break;
+				return TaskStatus.Success;
 			}
-			return TaskStatus.Success;
+			else 
+			{
+
+				return TaskStatus.Failure;
+			}
+			
 		}
 	}
 }
