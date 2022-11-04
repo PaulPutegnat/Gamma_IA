@@ -17,13 +17,15 @@ namespace IIM
         {
             Vector2 pos = GameManager.Instance.GetGameData().GetSpaceShipForOwner(0).Position;
             Collider2D[] obj = Physics2D.OverlapCircleAll(pos, radius.Value);
-
+            
             foreach (var o in obj)
             {
                 if (o.gameObject.layer == 14)
-                    return TaskStatus.Success;
+                    // Debug.Log("debug " + o.gameObject.name);
+                    // if (o.GetComponent<Bullet>().)
+                return TaskStatus.Success;
             }
-
+            
             return TaskStatus.Failure;
         }
     }
