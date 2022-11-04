@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BehaviorDesigner.Runtime;
@@ -18,18 +19,30 @@ namespace GammaTeam
 		public override void Initialize(SpaceShipView spaceship, GameData data)
 		{
 			nextAngleToTurn = spaceship.Orientation;
+			
+			CalculNextPointToGo(spaceship); // Debug
 		}
 
 		public override InputData UpdateInput(SpaceShipView spaceship, GameData data)
 		{
 			SpaceShipView otherSpaceship = data.GetSpaceShipForOwner(1 - spaceship.Owner);
-			float thrust = 1.0f;
+			
+			if (wayPointA == null || wayPointA.Owner == spaceship.Owner)
+			{
+				CalculNextPointToGo(spaceship);
+			}
+			
+			Vector3 vec = wayPointA.Position - (Vector2)transform.position;
+			float angle = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
+			float speed = Mathf.Lerp(0.25f, 1f, angle <= 30f ? 1f : angle >= 90f ? 0f : 0.5f);
+			
+			float thrust = Math.Abs(spaceship.Orientation - nextAngleToTurn) > 5f ? 0f : 1f;
 			float targetOrient = nextAngleToTurn;
 			bool needShoot = AimingHelpers.CanHit(spaceship, otherSpaceship.Position, otherSpaceship.Velocity, 0.15f);
 			return new InputData(thrust, targetOrient, needShoot, false, false);
 		}
 
-		public void CalculNextPointToGo()
+		public void CalculNextPointToGo(SpaceShipView _spaceShip)
 		{
 			wayPointA = null;
 
@@ -37,7 +50,7 @@ namespace GammaTeam
 
 			for (int i = 0; i < wayPointViews.Count; i++)
 			{
-				if (wayPointViews[i].Owner == 0) // Change to our ship id
+				if (wayPointViews[i].Owner == _spaceShip.Owner) // Change to our ship id
 				{
 					continue;
 				}
@@ -51,10 +64,14 @@ namespace GammaTeam
 				{
 					wayPointA = wayPointViews[i];
 				}
-
-				hasToMove = true;
-				nextAngleToTurn = Quaternion.LookRotation(wayPointA.Position).eulerAngles.y + transform.rotation.y;
 			}
+			
+			hasToMove = true;
+
+			Vector3 vec = wayPointA.Position - (Vector2)transform.position;
+			float angle = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
+			nextAngleToTurn = angle + 180f;
+			Debug.Log(nextAngleToTurn);
 		}
 	}
 }
