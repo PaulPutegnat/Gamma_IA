@@ -6,6 +6,6 @@ public class Shockwave : StateBase
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        //gammaController.Shockwave();
+        gammaController.Shockwave();
     }
 }

@@ -16,6 +16,8 @@ namespace GammaTeam
 		private SpaceShipView ourSpaceship;
 		private GameData gameData;
 
+		private bool _fireShowave;
+
 		[SerializeField] private LayerMask minesLayerMask;
 
 		public override void Initialize(SpaceShipView spaceship, GameData data)
@@ -85,6 +87,28 @@ namespace GammaTeam
 					wayPointA = wayPointViews[i];
 				}
 			}
+		}
+		private bool IsBetween(double testValue, double bound1, double bound2)
+		{
+			return (testValue >= Math.Min(bound1, bound2) && testValue <= Math.Max(bound1, bound2));
+		}
+		public void Shockwave()
+        {
+			_fireShowave = true;
+        }
+
+		public bool asToFireShockwave()
+        {
+			SpaceShipView otherSpaceShip = gameData.GetSpaceShipForOwner(1 - ourSpaceship.Owner);
+			if (IsBetween(otherSpaceShip.Position.x, ourSpaceship.Position.x - 3, ourSpaceship.Position.x + 3) || IsBetween(otherSpaceShip.Position.y, ourSpaceship.Position.y - 3, ourSpaceship.Position.y + 3))
+			{
+				return true;
+			}
+			if (Physics.CheckSphere(ourSpaceship.Position, 3, minesLayerMask))
+			{
+				return true;
+			}
+			return false;
 		}
 	}
 }
