@@ -13,14 +13,13 @@ namespace GammaTeam
 		private BehaviorManager.BehaviorTree tree;
 		
 		private WayPointView wayPointA;
-		private float nextAngleToTurn;
-		private bool hasToMove = false;
-		
+
+		[SerializeField] private LayerMask minesLayerMask;
+
 		public override void Initialize(SpaceShipView spaceship, GameData data)
 		{
-			nextAngleToTurn = spaceship.Orientation;
-			
-			CalculNextPointToGo(spaceship); // Debug
+			CalculNextPointToGo(spaceship);
+			Debug.Log(spaceship.Owner);
 		}
 
 		public override InputData UpdateInput(SpaceShipView spaceship, GameData data)
@@ -31,15 +30,34 @@ namespace GammaTeam
 			{
 				CalculNextPointToGo(spaceship);
 			}
+
+			float thrust = 0.5f;
+			float targetOrient = wayPointA != null ? Quaternion.LookRotation(Vector3.forward, wayPointA.Position - spaceship.Position)
+				.eulerAngles.z + 90f : spaceship.Orientation;
 			
-			Vector3 vec = wayPointA.Position - (Vector2)transform.position;
-			float angle = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
-			float speed = Mathf.Lerp(0.25f, 1f, angle <= 30f ? 1f : angle >= 90f ? 0f : 0.5f);
+			//
 			
-			float thrust = Math.Abs(spaceship.Orientation - nextAngleToTurn) > 5f ? 0f : 1f;
-			float targetOrient = nextAngleToTurn;
-			bool needShoot = AimingHelpers.CanHit(spaceship, otherSpaceship.Position, otherSpaceship.Velocity, 0.15f);
-			return new InputData(thrust, targetOrient, needShoot, false, false);
+			float speed = Mathf.Lerp(0f, 1f, targetOrient - spaceship.Orientation <= 20f ? 1f : spaceship.Orientation >= 50f ? 0f : 0.5f);
+			
+			Debug.Log(speed);
+
+			bool needShoot = false;
+			
+			// Shoot Enemy spaceship
+			needShoot = AimingHelpers.CanHit(spaceship, otherSpaceship.Position, otherSpaceship.Velocity, 0.15f);
+
+			if (!needShoot)
+			{
+				// Shoot mine
+				RaycastHit2D hit2D = Physics2D.Raycast(spaceship.Position, spaceship.LookAt, 5f, minesLayerMask);
+
+				if (hit2D.collider != null && !hit2D.collider.CompareTag("Bullet") && hit2D.collider.CompareTag("Mine"))
+				{
+					needShoot = true;
+				}
+			}
+
+			return new InputData(speed, targetOrient, needShoot, false, false);
 		}
 
 		public void CalculNextPointToGo(SpaceShipView _spaceShip)
@@ -50,7 +68,7 @@ namespace GammaTeam
 
 			for (int i = 0; i < wayPointViews.Count; i++)
 			{
-				if (wayPointViews[i].Owner == _spaceShip.Owner) // Change to our ship id
+				if (wayPointViews[i].Owner == _spaceShip.Owner)
 				{
 					continue;
 				}
@@ -59,19 +77,12 @@ namespace GammaTeam
 				{
 					wayPointA = wayPointViews[i];
 				}
-				else if (Vector2.Distance(wayPointA.Position, transform.position) >
-				         Vector2.Distance(wayPointViews[i].Position, transform.position)) // Get position of our ship
+				else if (Vector2.Distance(_spaceShip.Position, wayPointA.Position) >
+				         Vector2.Distance(_spaceShip.Position, wayPointViews[i].Position))
 				{
 					wayPointA = wayPointViews[i];
 				}
 			}
-			
-			hasToMove = true;
-
-			Vector3 vec = wayPointA.Position - (Vector2)transform.position;
-			float angle = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
-			nextAngleToTurn = angle + 180f;
-			Debug.Log(nextAngleToTurn);
 		}
 	}
 }
