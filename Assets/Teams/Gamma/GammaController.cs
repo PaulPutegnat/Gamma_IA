@@ -7,29 +7,31 @@ using DoNotModify;
 
 namespace GammaTeam
 {
-
 	public class GammaController : BaseSpaceShipController
 	{
 		private BehaviorManager.BehaviorTree tree;
 		
 		private WayPointView wayPointA;
 
+		private SpaceShipView ourSpaceship;
+		private GameData gameData;
+
 		[SerializeField] private LayerMask minesLayerMask;
 
 		public override void Initialize(SpaceShipView spaceship, GameData data)
 		{
-			CalculNextPointToGo(spaceship);
-			Debug.Log(spaceship.Owner);
+			ourSpaceship = spaceship;
+			gameData = data;
 		}
 
 		public override InputData UpdateInput(SpaceShipView spaceship, GameData data)
 		{
 			SpaceShipView otherSpaceship = data.GetSpaceShipForOwner(1 - spaceship.Owner);
 			
-			if (wayPointA == null || wayPointA.Owner == spaceship.Owner)
+			/*if (wayPointA == null || wayPointA.Owner == spaceship.Owner)
 			{
 				CalculNextPointToGo(spaceship);
-			}
+			}*/
 
 			float thrust = 0.5f;
 			float targetOrient = wayPointA != null ? Quaternion.LookRotation(Vector3.forward, wayPointA.Position - spaceship.Position)
@@ -60,7 +62,7 @@ namespace GammaTeam
 			return new InputData(speed, targetOrient, needShoot, false, false);
 		}
 
-		public void CalculNextPointToGo(SpaceShipView _spaceShip)
+		public void CalculNextPointToGo()
 		{
 			wayPointA = null;
 
@@ -68,7 +70,7 @@ namespace GammaTeam
 
 			for (int i = 0; i < wayPointViews.Count; i++)
 			{
-				if (wayPointViews[i].Owner == _spaceShip.Owner)
+				if (wayPointViews[i].Owner == ourSpaceship.Owner)
 				{
 					continue;
 				}
@@ -77,8 +79,8 @@ namespace GammaTeam
 				{
 					wayPointA = wayPointViews[i];
 				}
-				else if (Vector2.Distance(_spaceShip.Position, wayPointA.Position) >
-				         Vector2.Distance(_spaceShip.Position, wayPointViews[i].Position))
+				else if (Vector2.Distance(ourSpaceship.Position, wayPointA.Position) >
+				         Vector2.Distance(ourSpaceship.Position, wayPointViews[i].Position))
 				{
 					wayPointA = wayPointViews[i];
 				}
