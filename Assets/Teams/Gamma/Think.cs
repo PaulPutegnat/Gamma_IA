@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class Think : StateBase
 {
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        RaiseStateChanged(nameof(Think), nameof(OnStateEnter));
-    }
-
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (gammaController == null)
+            return;
+        
         if (gammaController.HasToShootEnemy())
         {
             animator.SetTrigger("Shoot Enemy");
@@ -28,10 +26,11 @@ public class Think : StateBase
             animator.SetTrigger("Choose Point");
             return;
         }
-    }
 
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        RaiseStateChanged(nameof(Think), nameof(OnStateExit));
+        if (gammaController.HasToFireShockwave())
+        {
+            animator.SetTrigger("Shockwave");
+            return;
+        }
     }
 }
