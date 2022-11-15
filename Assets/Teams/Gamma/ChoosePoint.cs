@@ -6,6 +6,6 @@ public class ChoosePoint : StateBase
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        //gammaController.CalculNextPointToGo();
+        gammaController.CalculNextPointToGo();
     }
 }

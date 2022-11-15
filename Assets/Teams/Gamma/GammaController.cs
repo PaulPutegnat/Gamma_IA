@@ -32,9 +32,7 @@ namespace GammaTeam
 
 		public override InputData UpdateInput(SpaceShipView spaceship, GameData data)
 		{
-			SpaceShipView otherSpaceship = data.GetSpaceShipForOwner(1 - spaceship.Owner);
-			
-			/*if (wayPointA == null || wayPointA.Owner == spaceship.Owner)
+			/*if ()
 			{
 				CalculNextPointToGo(spaceship);
 			}*/
@@ -43,13 +41,34 @@ namespace GammaTeam
 			float targetOrient = wayPointA != null ? Quaternion.LookRotation(Vector3.forward, wayPointA.Position - spaceship.Position)
 				.eulerAngles.z + 90f : spaceship.Orientation;
 			
-			//
 			
-			speed = Mathf.Lerp(0f, 1f, targetOrient - spaceship.Orientation <= 20f ? 1f : spaceship.Orientation >= 50f ? 0f : 0.5f);
-			
-			Debug.Log(speed);
+			float speed = Mathf.Lerp(0f, 1f, targetOrient - spaceship.Orientation <= 20f ? 1f : spaceship.Orientation >= 50f ? 0f : 0.5f);
 
 			return new InputData(speed, targetOrient, needShoot, false, false);
+		}
+
+		public bool HasToShootEnemy()
+		{
+			SpaceShipView otherSpaceship = gameData.GetSpaceShipForOwner(1 - ourSpaceship.Owner);
+			return AimingHelpers.CanHit(ourSpaceship, otherSpaceship.Position, otherSpaceship.Velocity, 0.15f);
+		}
+		
+		public bool HasToShootMine()
+		{
+			// Shoot mine
+			RaycastHit2D hit2D = Physics2D.Raycast(ourSpaceship.Position, ourSpaceship.LookAt, 5f, minesLayerMask);
+
+			if (hit2D.collider != null && !hit2D.collider.CompareTag("Bullet") && hit2D.collider.CompareTag("Mine"))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool HasToChoosePoint()
+		{
+			return wayPointA == null || wayPointA.Owner == ourSpaceship.Owner;
 		}
 
 		public void CalculNextPointToGo()
